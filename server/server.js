@@ -10,7 +10,7 @@ import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
-const { readFile } = require('fs').promises
+const { readFile, writeFile } = require('fs').promises
 require('colors')
 
 let Root
@@ -73,9 +73,42 @@ server.get('/api/v1/goods/:type/:direction', async (req, res) => {
 
 server.get('/api/v1/rates', async (req, res) => {
   const rate = await axios
-    .get('https://api.ratesapi.io/api/latest?base=USD&symbols=EUR,CAD,USD')
-    .then(({ data }) => data.rates)
+    .get('https://api.exchangerate.host/latest?base=USD&symbols=USD,EUR,CAD')
+    .then(({ data }) => {
+      writeFile(`${__dirname}/data/rates.json`, JSON.stringify(data.rates), 'utf8')
+      return data.rates
+    })
+    .catch(async () => {
+      const lastRates = await readFile(`${__dirname}/data/rates.json`, 'utf8')
+      return JSON.parse(lastRates)
+    })
   res.json(rate)
+})
+
+server.post('/api/v1/logs', async (req, res) => {
+  const logStr = req.body.text
+  console.log(logStr)
+  await readFile(`${__dirname}/data/logs.json`, 'utf8')
+    .then((arrOfLogs) => {
+      const logs = JSON.parse(arrOfLogs)
+      if (logs.length >= 100) {
+        logs.shift()
+      }
+      writeFile(`${__dirname}/data/logs.json`, JSON.stringify([...logs, logStr]), 'utf8')
+    })
+    .catch(() => {
+      writeFile(`${__dirname}/data/logs.json`, JSON.stringify([logStr]), 'utf8')
+    })
+  res.json({ status: 'Log updated' })
+})
+
+server.get('/api/v1/logs', async (req, res) => {
+  const logs = await readFile(`${__dirname}/data/logs.json`, { encoding: 'utf8' })
+    .then((arrOfLogs) => {
+      return JSON.parse(arrOfLogs)
+    })
+    .catch((err) => err)
+  res.json(logs)
 })
 
 server.use('/api/', (req, res) => {

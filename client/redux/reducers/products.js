@@ -1,3 +1,10 @@
+import { LOG_CHANGE_CURRENCY, LOG_SORTING } from '../middleware/logs'
+
+const GET_PRODUCTS = 'store/products/GET_PRODUCTS'
+const ADD_RATES = 'store/products/ADD_RATES'
+const SET_CURRENCYNAME = 'store/products/SET_CURRENCYNAME'
+const SET_SORT_TYPE = 'store/products/SET_SORT_TYPE'
+
 const initialState = {
   goods: {
     // 'id': {
@@ -15,11 +22,6 @@ const initialState = {
     direction: 'a-z'
   }
 }
-
-const GET_PRODUCTS = 'store/products/GET_PRODUCTS'
-const ADD_RATES = 'store/products/ADD_RATES'
-const SET_CURRENCYNAME = 'store/products/SET_CURRENCYNAME'
-const SET_SORT_TYPE = 'store/products/SET_SORT_TYPE'
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -56,7 +58,7 @@ export default (state = initialState, action) => {
 }
 /*
 array = [{ id: 10, title: 'Pepe' }, { id: 'hi', title: 'Marina' }]
-object = { 
+object = {
   '10': { id: 10, title: 'Pepe' },
   'hi': { id: 'hi', title: 'Marina' }
 }
@@ -88,7 +90,17 @@ export function addRates() {
 }
 
 export function setCurrency(currencyName) {
-  return { type: SET_CURRENCYNAME, currencyName }
+  return (dispatch, getState) => {
+    const lastCurrency = getState().products.currency
+    dispatch({ type: SET_CURRENCYNAME, currencyName })
+    dispatch({
+      type: LOG_CHANGE_CURRENCY,
+      payload: {
+        lastCurrency,
+        newCurrency: currencyName
+      }
+    })
+  }
 }
 
 export function sortProducts(sortType = 'price', sortDirection = 'a-z') {
@@ -104,26 +116,31 @@ export function sortProducts(sortType = 'price', sortDirection = 'a-z') {
       sortType,
       sortDirection
     })
-
-    // const sortedBasket = Object.values(basket).sort((a, b) => {
-    //   if (type === 'price' && direction === 'a-z') {
-    //     return a.price - b.price
-    //   }
-    //   if (type === 'price' && direction === 'z-a') {
-    //     return b.price - a.price
-    //   }
-    //   if (type === 'title' && direction === 'a-z') {
-    //     return a.title.localeCompare(b.title)
-    //   }
-    //   if (type === 'title' && direction === 'z-a') {
-    //     return b.title.localeCompare(a.title)
-    //   }
-    //   return a.price - b.price
-    // })
-
-
+    dispatch({
+        type: LOG_SORTING,
+        payload: {
+          title: sortType,
+          direction: sortDirection
+        }
+      })
   }
 }
+
+// const sortedBasket = Object.values(basket).sort((a, b) => {
+//   if (type === 'price' && direction === 'a-z') {
+//     return a.price - b.price
+//   }
+//   if (type === 'price' && direction === 'z-a') {
+//     return b.price - a.price
+//   }
+//   if (type === 'title' && direction === 'a-z') {
+//     return a.title.localeCompare(b.title)
+//   }
+//   if (type === 'title' && direction === 'z-a') {
+//     return b.title.localeCompare(a.title)
+//   }
+//   return a.price - b.price
+// })
 
 /*
 export function getProductsFromServerToMap() {

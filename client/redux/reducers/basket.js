@@ -1,4 +1,6 @@
- const initialState = {
+import { LOG_ADD_ITEM, LOG_REMOVE_ITEM } from '../middleware/logs'
+
+const initialState = {
   basketProducts: {
     /* 'someId': {
       id: test,
@@ -54,6 +56,12 @@ export function addToBasket(itemId) {
       totalAmount: total.amount,
       totalPrice: total.price
     })
+    dispatch({
+      type: LOG_ADD_ITEM,
+      payload: {
+        item: updatedBasket[itemId].title
+      }
+    })
   }
 }
 
@@ -67,6 +75,12 @@ export function removeFromBasket(itemId) {
       amount: basket[itemId].amount - 1 }
     }
     if (updatedBasket[itemId].amount <= 0) {
+      dispatch({
+        type: LOG_REMOVE_ITEM,
+        payload: {
+          item: updatedBasket[itemId].title
+        }
+      })
       delete updatedBasket[itemId]
     }
     const total = calculateTotal(updatedBasket)
@@ -90,7 +104,7 @@ export function changeBasketMap(itemId, sign) {
       ? basket.set(itemId, 1)
       : basket.set(itemId, basket.get(itemId) + 1)
     }else{
-      basket.get(itemId) <= 1 
+      basket.get(itemId) <= 1
       ? basket.delete(itemId)
       : basket.set(itemId, basket.get(itemId) - 1)
     }
