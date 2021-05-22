@@ -107,7 +107,7 @@ server.get('/api/v1/logs', async (req, res) => {
     .then((arrOfLogs) => {
       return JSON.parse(arrOfLogs)
     })
-    .catch((err) => err)
+    .catch(() => [])
   res.json(logs)
 })
 
