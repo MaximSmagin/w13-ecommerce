@@ -91,15 +91,18 @@ export function addRates() {
 
 export function setCurrency(currencyName) {
   return (dispatch, getState) => {
-    const lastCurrency = getState().products.currency
-    dispatch({ type: SET_CURRENCYNAME, currencyName })
-    dispatch({
-      type: LOG_CHANGE_CURRENCY,
-      payload: {
-        lastCurrency,
-        newCurrency: currencyName
-      }
-    })
+    const store = getState()
+    const lastCurrency = store.products.currency
+    if (!!store.products.rates?.[currencyName] && currencyName !== store.products.currency) {
+      dispatch({ type: SET_CURRENCYNAME, currencyName })
+      dispatch({
+        type: LOG_CHANGE_CURRENCY,
+        payload: {
+          lastCurrency,
+          newCurrency: currencyName
+        }
+      })
+    }
   }
 }
 
