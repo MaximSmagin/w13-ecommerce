@@ -79,8 +79,14 @@ server.get('/api/v1/rates', async (req, res) => {
       return data.rates
     })
     .catch(async () => {
-      const lastRates = await readFile(`${__dirname}/data/rates.json`, 'utf8')
-      return JSON.parse(lastRates)
+      try {
+        const lastRates = await readFile(`${__dirname}/data/rates.json`, 'utf8')
+        return JSON.parse(lastRates)
+      } catch (err) {
+        console.log(err)
+        writeFile(`${__dirname}/data/rates.json`, JSON.stringify({ 'USD': 1 }), 'utf8')
+      }
+      return { 'USD': 1 }
     })
   res.json(rate)
 })
